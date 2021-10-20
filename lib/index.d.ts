@@ -1,1 +1,2 @@
-export declare function add(a: number, b: number): number;
+import { getDeviceCount, getDeviceName, getDeviceUSBStrings } from "./rtlsdr-static";
+export { getDeviceCount, getDeviceName, getDeviceUSBStrings };
