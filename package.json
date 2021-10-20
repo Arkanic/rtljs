@@ -1,0 +1,44 @@
+{
+  "name": "rtljs",
+  "version": "0.1.0",
+  "description": "node.js interface for librtl-sdr, using FFI-NAPI. Works with newer versions of node (like v16)",
+  "main": "./lib/index.js",
+  "module": "./lib/index.d.ts",
+  "files": [
+    "lib/"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc -p tsconfig.json",
+    "prepublish": "npm run tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arkanic/rtljs.git"
+  },
+  "keywords": [
+    "rtl-sdr",
+    "rtl",
+    "sdr",
+    "librtlsdr",
+    "sdr",
+    "rtl",
+    "radio",
+    "antenna"
+  ],
+  "author": "Arkanic",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Arkanic/rtljs/issues"
+  },
+  "homepage": "https://github.com/Arkanic/rtljs#readme",
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "@types/ffi-napi": "^4.0.4",
+    "@types/ref-napi": "^3.0.4",
+    "ffi-napi": "^4.0.3",
+    "ref-napi": "^3.0.3"
+  }
+}
