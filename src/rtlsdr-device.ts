@@ -5,9 +5,13 @@ import * as baremetal from "./baremetal";
 import {librtlsdr} from "./baremetal";
 
 export default class RTLSDRDevice {
-    device:void;
+    device:ref.Pointer<void>;
 
-    constructor(device:void) {
+    constructor(device:ref.Pointer<void>) {
         this.device = device;
+    }
+
+    setXtalFreq(rtlFreq:number, tunerFreq:number) {
+        let result = librtlsdr.rtlsdr_set_xtal_freq(this.device, rtlFreq, tunerFreq);
     }
 }

@@ -1,4 +1,6 @@
+import ref from "ref-napi";
 export default class RTLSDRDevice {
-    device: void;
-    constructor(device: void);
+    device: ref.Pointer<void>;
+    constructor(device: ref.Pointer<void>);
+    setXtalFreq(rtlFreq: number, tunerFreq: number): void;
 }
