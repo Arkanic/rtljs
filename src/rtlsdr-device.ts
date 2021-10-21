@@ -131,7 +131,6 @@ export default class RTLSDRDevice {
     getCenterFreq():number {
         // @ts-ignore
         let freq = librtlsdr.rtlsdr_get_center_freq(this.device);
-        if(freq === 0) throw new Error("Unknown Error [device.getCenterFreq]");
 
         return freq;
     }
@@ -373,7 +372,6 @@ export default class RTLSDRDevice {
 
         // @ts-ignore
         let result = librtlsdr.rtlsdr_read_sync(this.device, ptr, len, n);
-        if(result !== 0) throw new Error("Unknown Error [device.readSync]");
 
         return ptr.deref();
     }
