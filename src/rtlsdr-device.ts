@@ -157,4 +157,224 @@ export default class RTLSDRDevice {
         let ppm = librtlsdr.rtlsdr_get_freq_correction(this.device);
         return ppm;
     }
+
+    /**
+     * Get the tuner type.
+     * 
+     * @returns RTLSDR_TUNER_UNKNOWN on error, tuner type otherwise
+     */
+    getTunerType():string {
+        // @ts-ignore
+        let tunerVal = librtlsdr.rtlsdr_get_tuner_type(this.device);
+
+        return baremetal.rtlsdr_tunerEnum[tunerVal];
+    }
+
+    /**
+     * Get a list of gains supported by the tuner.
+     *
+     * NOTE: The gains argument must be preallocated by the caller. If NULL is
+     * being given instead, the number of available gain values will be returned.
+     * 
+     * @param gains Array of gain values. In tenths of a dB, 115 means 11.5 dB.
+     * @returns Number of available (returned) gain values otherwise
+     */
+    getTunerGains(gains:ref.Pointer<number>):number {
+        // @ts-ignore
+        let gain = librtlsdr.rtlsdr_get_tuner_gains(this.device, gains);
+        if(gain < 0) throw new Error("Unknown Error [device.getTunerGains]");
+
+        return gain;
+    }
+
+    /**
+     * Set the gain for the device.
+     * Manual gain mode must be enabled for this to work.
+     *
+     * Valid gain values (in tenths of a dB) for the E4000 tuner:
+     * -10, 15, 40, 65, 90, 115, 140, 165, 190,
+     * 215, 240, 290, 340, 420, 430, 450, 470, 490
+     *
+     * Valid gain values may be queried with rtlsdr_get_tuner_gains function.
+     * 
+     * @param gain Measured in tenths of a dB, 115 means 11.5 dB.
+     */
+    setTunerGain(gain:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_tuner_gain(this.device, gain);
+        if(result < 0) throw new Error("Unknown Error [device.setTunerGain]");
+    }
+
+    /**
+     * Set the bandwidth for the device.
+     * 
+     * @param bw Bandwidth in Hz. Zero means automatic BW selection.
+     */
+    setTunerBandwidth(bw:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_tuner_bandwidth(this.device, bw);
+        if(result < 0) throw new Error("Unknown Error [device.setTunerBandwidth]");
+    }
+
+    /**
+     * Get actual gain the device is configured to.
+     * 
+     * @returns Gain in tenths of a dB, 115 means 11.5 dB.
+     */
+    getTunerGain():number {
+        // @ts-ignore
+        let gain = librtlsdr.rtlsdr_get_tuner_gain(this.device);
+        if(gain === 0) throw new Error("Unknown Error [device.getTunerGain]");
+
+        return gain;
+    }
+
+    /**
+     * Set the intermediate frequency gain for the device.
+     * 
+     * @param stage Intermediate frequency gain stage number (1 to 6 for E4000)
+     * @param gain Measured in tenths of a dB, -30 means -3.0 dB.
+     */
+    setTunerIfGain(stage:number, gain:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_tuner_if_gain(this.device, stage, gain);
+        if(result < 0) throw new Error("Unknown Error [device.setTunerIfGain]");
+    }
+
+    /**
+     * Set the gain mode (automatic/manual) for the device.
+     * Manual gain mode must be enabled for the gain setter function to work.
+     * 
+     * @param manual Gain mode, 1 means manual gain mode shall be enabled.
+     */
+    setTunerGainMode(manual:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_tuner_gain_mode(this.device, manual);
+        if(result < 0) throw new Error("Unknown Error [device.setTunerGainMode]");
+    }
+
+    /**
+     * Set the sample rate for the device, also selects the baseband filters
+     * according to the requested sample rate for tuners where this is possible.
+     * 
+     * @param rate samp_rate the sample rate to be set, possible values are:
+     * 		    225001 - 300000 Hz
+     * 		    900001 - 3200000 Hz
+     * 		    sample loss is to be expected for rates > 2400000
+     */
+    setSampleRate(rate:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_sample_rate(this.device, rate);
+        if(result !== 0) throw new Error("Unknown Error [device.setSampleRate]");
+    }
+
+    /**
+     * Get actual sample rate the device is configured to.
+     * 
+     * @returns Sample rate in Hz
+     */
+    getSampleRate():number {
+        // @ts-ignore
+        let rate = librtlsdr.rtlsdr_get_sample_rate(this.device);
+        if(rate === 0) throw new Error("Unknown Error [device.getSampleRate]");
+
+        return rate;
+    }
+
+    /**
+     * Enable test mode that returns an 8 bit counter instead of the samples.
+     * The counter is generated inside the RTL2832.
+     * 
+     * @param on Test mode, 1 means enabled, 0 disabled
+     */
+    setTestmode(on:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_testmode(this.device, on);
+        if(result !== 0) throw new Error("Unknown Error [device.setTestmode]");
+    }
+
+    /**
+     * Enable or disable the internal digital AGC of the RTL2832.
+     * 
+     * @param on digital AGC mode, 1 means enabled, 0 disabled
+     */
+    setAGCMode(on:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_agc_mode(this.device, on);
+        if(result !== 0) throw new Error("Unknown Error [device.setAGCMode]");
+    }
+
+    /**
+     * Enable or disable the direct sampling mode. When enabled, the IF mode
+     * of the RTL2832 is activated, and rtlsdr_set_center_freq() will control
+     * the IF-frequency of the DDC, which can be used to tune from 0 to 28.8 MHz
+     * (xtal frequency of the RTL2832).
+     * 
+     * @param on 0 means disabled, 1 I-ADC input enabled, 2 Q-ADC input enabled
+     */
+    setDirectSampling(on:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_direct_sampling(this.device, on);
+        if(result !== 0) throw new Error("Unknown Error [device.setDirectSampling]");
+    }
+
+    /**
+     * Get state of the direct sampling mode
+     * 
+     * @returns -1 on error, 0 means disabled, 1 I-ADC input enabled
+     *	    2 Q-ADC input enabled
+     */
+    getDirectSampling():number {
+        // @ts-ignore
+        let ds = librtlsdr.rtlsdr_get_direct_sampling(this.device);
+        if(ds === -1) throw new Error("Unknown Error [device.getDirectSampling]");
+
+        return ds;
+    }
+
+    /**
+     * Enable or disable offset tuning for zero-IF tuners, which allows to avoid
+     * problems caused by the DC offset of the ADCs and 1/f noise.
+     * 
+     * @param on 0 means disabled, 1 enabled
+     */
+    setOffsetTuning(on:number) {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_set_offset_tuning(this.device, on);
+        if(result !== 0) throw new Error("Unknown Error [device.setOffsetTuning]");
+    }
+
+    /**
+     * Get state of the offset tuning mode
+     * 
+     * @returns -1 on error, 0 means disabled, 1 enabled
+     */
+    getOffsetTuning():number {
+        // @ts-ignore
+        let ot = librtlsdr.rtlsdr_get_offset_tuning(this.device);
+        if(ot === 0) throw new Error("Unknown Error [device.getOffsetTuning]");
+
+        return ot;
+    }
+
+    /**
+     * Reset the device buffer
+     */
+    resetBuffer() {
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_reset_buffer(this.device);
+        if(result !== 0) throw new Error("Unknown Error [device.resetBuffer]");
+    }
+
+    readSync(len:number) {
+        let buffer = Buffer.alloc(len);
+        let n = ref.alloc(ref.types.int);
+        let ptr = ref.ref(buffer);
+
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_read_sync(this.device, ptr, len, n);
+        if(result !== 0) throw new Error("Unknown Error [device.readSync]");
+
+        return ptr.deref();
+    }
 }
