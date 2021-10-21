@@ -46,5 +46,4 @@ export declare const librtlsdr: {
     rtlsdr_read_async: ffi.ForeignFunction<number, [ref.Pointer<void>, void, ref.Pointer<void>, number, number]>;
     rtlsdr_cancel_async: ffi.ForeignFunction<number, [ref.Pointer<void>]>;
     rtlsdr_set_bias_tee: ffi.ForeignFunction<number, [ref.Pointer<void>, number]>;
-    rtlsdr_set_bias_tee_gpio: ffi.ForeignFunction<number, [ref.Pointer<void>, number, number]>;
 };

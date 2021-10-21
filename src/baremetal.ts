@@ -56,6 +56,5 @@ export const librtlsdr = ffi.Library("librtlsdr", {
     "rtlsdr_read_sync": ["int", [rtlsdr_devPtr, voidPtr, "int", intPtr]],
     "rtlsdr_read_async": ["int", [rtlsdr_devPtr, rtlsdr_read_async_cb_t, voidPtr, "uint32", "uint32"]],
     "rtlsdr_cancel_async": ["int", [rtlsdr_devPtr]],
-    "rtlsdr_set_bias_tee": ["int", [rtlsdr_devPtr, "int"]],
-    "rtlsdr_set_bias_tee_gpio": ["int", [rtlsdr_devPtr, "int", "int"]]
+    "rtlsdr_set_bias_tee": ["int", [rtlsdr_devPtr, "int"]]
 });
