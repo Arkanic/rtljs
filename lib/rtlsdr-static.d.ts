@@ -1,3 +1,4 @@
+import RTLSDRDevice from "./rtlsdr-device";
 /**
  * Get the number of available devices
  *
@@ -17,4 +18,26 @@ export interface DeviceUSBStrings {
     product: string | null;
     serial: string | null;
 }
+/**
+ * Get USB device strings. Maximum length is 256 bytes.
+ *
+ * @param index the device index
+ *
+ * @returns manufacturer, serial, and product name, may be null
+ */
 export declare function getDeviceUSBStrings(index: number): DeviceUSBStrings;
+/**
+ * Get device index by USB serial string descriptor.
+ *
+ * @param serial Serial string of the device
+ * @returns Device index of the first serial match
+ */
+export declare function getIndexBySerial(serial: string): number;
+/**
+ * Open RTLSDR device by index
+ *
+ * @param index Device index
+ * @returns Device instance
+ */
+export declare function open(index: number): RTLSDRDevice;
+export declare function close(device: RTLSDRDevice): void;

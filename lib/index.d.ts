@@ -1,2 +1,2 @@
-import { getDeviceCount, getDeviceName, getDeviceUSBStrings } from "./rtlsdr-static";
-export { getDeviceCount, getDeviceName, getDeviceUSBStrings };
+import { getDeviceCount, getDeviceName, getDeviceUSBStrings, getIndexBySerial } from "./rtlsdr-static";
+export { getDeviceCount, getDeviceName, getDeviceUSBStrings, getIndexBySerial };

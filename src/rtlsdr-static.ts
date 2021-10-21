@@ -1,9 +1,8 @@
-import ffi from "ffi-napi";
 import ref from "ref-napi";
 
 import * as baremetal from "./baremetal";
 import {librtlsdr} from "./baremetal";
-
+import RTLSDRDevice from "./rtlsdr-device";
 
 function digestCharPtr(charPtr:Buffer):string|null {
     let terminatingNullPos = charPtr.indexOf("\u0000");
@@ -14,7 +13,6 @@ function digestCharPtr(charPtr:Buffer):string|null {
         return null;
     }
 }
-
 
 /**
  * Get the number of available devices
@@ -42,6 +40,13 @@ export interface DeviceUSBStrings {
     serial:string|null;
 }
 
+/**
+ * Get USB device strings. Maximum length is 256 bytes.
+ * 
+ * @param index the device index
+ * 
+ * @returns manufacturer, serial, and product name, may be null
+ */
 export function getDeviceUSBStrings(index:number):DeviceUSBStrings {
     let manufacturer = Buffer.alloc(256).fill(0);
     let product = Buffer.alloc(256).fill(0);
@@ -55,4 +60,41 @@ export function getDeviceUSBStrings(index:number):DeviceUSBStrings {
         product: digestCharPtr(product),
         serial: digestCharPtr(serial)
     }
+}
+
+/**
+ * Get device index by USB serial string descriptor.
+ * 
+ * @param serial Serial string of the device
+ * @returns Device index of the first serial match
+ */
+export function getIndexBySerial(serial:string):number {
+    let result = librtlsdr.rtlsdr_get_index_by_serial(serial);
+    if(result === -1) throw new Error(`Name is NULL for serial ${serial}`);
+    else if(result === -2) throw new Error(`No devices were found at all for serial ${serial}`);
+    else if(result === -3) throw new Error(`Devices were found, but none with matching name for serial ${serial}`);
+    else if(result < 0) throw new Error(`Unkown error [getIndexBySerial(${serial})]`);
+    else {
+        return result;
+    }
+}
+
+/**
+ * Open RTLSDR device by index
+ * 
+ * @param index Device index
+ * @returns Device instance
+ */
+export function open(index:number):RTLSDRDevice {
+    let devicePtr = ref.alloc(baremetal.rtlsdr_devPtr);
+    let result = librtlsdr.rtlsdr_open(devicePtr, index);
+    if(result !== 0) throw new Error(`Unknown error [open(${index})]`);
+
+    return new RTLSDRDevice(devicePtr.deref());
+}
+
+export function close(device:RTLSDRDevice) {
+    // @ts-ignore
+    let result = librtlsdr.rtlsdr_close(device.device);
+    if(result !== 0) throw new Error(`Unknown Error [close]`);
 }
