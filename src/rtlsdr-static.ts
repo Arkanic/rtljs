@@ -4,7 +4,7 @@ import * as baremetal from "./baremetal";
 import {librtlsdr} from "./baremetal";
 import RTLSDRDevice from "./rtlsdr-device";
 
-function digestCharPtr(charPtr:Buffer):string|null {
+export function digestCharPtr(charPtr:Buffer):string|null {
     let terminatingNullPos = charPtr.indexOf("\u0000");
     if(terminatingNullPos > 0) {
         let rawString = charPtr.toString();
@@ -54,7 +54,7 @@ export function getDeviceUSBStrings(index:number):DeviceUSBStrings {
 
     // @ts-ignore
     let result = librtlsdr.rtlsdr_get_device_usb_strings(index, manufacturer, product, serial);
-    if(result !== 0) throw new Error(`Failed to open device #${index}: ${result}`);
+    if(result !== 0) throw new Error(`Unknown Error [getDeviceUSBStrings(${index})]`);
     return {
         manufacturer: digestCharPtr(manufacturer),
         product: digestCharPtr(product),
@@ -73,7 +73,7 @@ export function getIndexBySerial(serial:string):number {
     if(result === -1) throw new Error(`Name is NULL for serial ${serial}`);
     else if(result === -2) throw new Error(`No devices were found at all for serial ${serial}`);
     else if(result === -3) throw new Error(`Devices were found, but none with matching name for serial ${serial}`);
-    else if(result < 0) throw new Error(`Unkown error [getIndexBySerial(${serial})]`);
+    else if(result < 0) throw new Error(`Unkown Error [getIndexBySerial(${serial})]`);
     else {
         return result;
     }
@@ -88,7 +88,7 @@ export function getIndexBySerial(serial:string):number {
 export function open(index:number):RTLSDRDevice {
     let devicePtr = ref.alloc(baremetal.rtlsdr_devPtr);
     let result = librtlsdr.rtlsdr_open(devicePtr, index);
-    if(result !== 0) throw new Error(`Unknown error [open(${index})]`);
+    if(result !== 0) throw new Error(`Unknown Error [open(${index})]`);
 
     return new RTLSDRDevice(devicePtr.deref());
 }

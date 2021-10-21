@@ -1,4 +1,7 @@
+/// <reference types="node" />
+/// <reference types="ref-napi" />
 import RTLSDRDevice from "./rtlsdr-device";
+export declare function digestCharPtr(charPtr: Buffer): string | null;
 /**
  * Get the number of available devices
  *
