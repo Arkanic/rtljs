@@ -90,7 +90,7 @@ export function open(index:number):RTLSDRDevice {
     let result = librtlsdr.rtlsdr_open(devicePtr, index);
     if(result !== 0) throw new Error(`Unknown error [open(${index})]`);
 
-    return new RTLSDRDevice(devicePtr);
+    return new RTLSDRDevice(devicePtr.deref());
 }
 
 export function close(device:RTLSDRDevice) {
