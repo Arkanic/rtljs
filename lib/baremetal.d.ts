@@ -2,7 +2,6 @@ import ffi from "ffi-napi";
 import ref from "ref-napi";
 export declare const rtlsdr_dev: ref.Type<void>;
 export declare const rtlsdr_devPtr: ref.Type<ref.Pointer<void>>;
-export declare const rtlsdr_read_async_cb_t: ref.Type<void>;
 export declare const rtlsdr_tunerEnum: string[];
 export declare const rtlsdr_tuner: ref.Type<void>;
 export declare const uint8Ptr: ref.Type<ref.Pointer<number>>;
@@ -43,7 +42,7 @@ export declare const librtlsdr: {
     rtlsdr_get_offset_tuning: ffi.ForeignFunction<number, [ref.Pointer<void>]>;
     rtlsdr_reset_buffer: ffi.ForeignFunction<number, [ref.Pointer<void>]>;
     rtlsdr_read_sync: ffi.ForeignFunction<number, [ref.Pointer<void>, ref.Pointer<void>, number, ref.Pointer<number>]>;
-    rtlsdr_read_async: ffi.ForeignFunction<number, [ref.Pointer<void>, void, ref.Pointer<void>, number, number]>;
+    rtlsdr_read_async: ffi.ForeignFunction<number, [ref.Pointer<void>, void, number, number]>;
     rtlsdr_cancel_async: ffi.ForeignFunction<number, [ref.Pointer<void>]>;
     rtlsdr_set_bias_tee: ffi.ForeignFunction<number, [ref.Pointer<void>, number]>;
 };

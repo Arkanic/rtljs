@@ -3,7 +3,6 @@ import ref from "ref-napi";
 
 export const rtlsdr_dev = ref.types.void;
 export const rtlsdr_devPtr = ref.refType(rtlsdr_dev);
-export const rtlsdr_read_async_cb_t = ref.types.void;
 export const rtlsdr_tunerEnum = [
     "RTLSDR_TUNER_UNKNOWN",
     "RTLSDR_TUNER_E4000",
@@ -54,7 +53,7 @@ export const librtlsdr = ffi.Library("librtlsdr", {
     "rtlsdr_get_offset_tuning": ["int", [rtlsdr_devPtr]],
     "rtlsdr_reset_buffer": ["int", [rtlsdr_devPtr]],
     "rtlsdr_read_sync": ["int", [rtlsdr_devPtr, voidPtr, "int", intPtr]],
-    "rtlsdr_read_async": ["int", [rtlsdr_devPtr, rtlsdr_read_async_cb_t, voidPtr, "uint32", "uint32"]],
+    "rtlsdr_read_async": ["int", [rtlsdr_devPtr, "void", "uint32", "uint32"]],
     "rtlsdr_cancel_async": ["int", [rtlsdr_devPtr]],
     "rtlsdr_set_bias_tee": ["int", [rtlsdr_devPtr, "int"]]
 });
