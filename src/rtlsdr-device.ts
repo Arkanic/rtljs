@@ -391,6 +391,8 @@ export default class RTLSDRDevice {
     readAsync(callback:(buf:string, len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
         let rtlsdrCallback = ffi.Callback("void", ["char*", "uint32", "void"], callback);
         // @ts-ignore
-        librtlsdr.rtlsdr_read_async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len);
+        librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {
+            if(err) throw err;
+        });
     }
 }
