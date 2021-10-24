@@ -42,7 +42,7 @@ export declare const librtlsdr: {
     rtlsdr_get_offset_tuning: ffi.ForeignFunction<number, [ref.Pointer<void>]>;
     rtlsdr_reset_buffer: ffi.ForeignFunction<number, [ref.Pointer<void>]>;
     rtlsdr_read_sync: ffi.ForeignFunction<number, [ref.Pointer<void>, ref.Pointer<void>, number, ref.Pointer<number>]>;
-    rtlsdr_read_async: ffi.ForeignFunction<number, [ref.Pointer<void>, void, number, number]>;
+    rtlsdr_read_async: ffi.ForeignFunction<number, [ref.Pointer<void>, void, void, number, number]>;
     rtlsdr_cancel_async: ffi.ForeignFunction<number, [ref.Pointer<void>]>;
     rtlsdr_set_bias_tee: ffi.ForeignFunction<number, [ref.Pointer<void>, number]>;
 };
