@@ -393,6 +393,7 @@ export default class RTLSDRDevice {
         // @ts-ignore
         librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {
             if(err) throw err;
+            console.log(value);
         });
     }
 }
