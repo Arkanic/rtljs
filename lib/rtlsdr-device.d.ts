@@ -193,16 +193,4 @@ export default class RTLSDRDevice {
      */
     resetBuffer(): void;
     readSync(len: number): Buffer;
-    /**
-     * Read samples from the device asynchronously. This function will block until
-     * it is being canceled using rtlsdr_cancel_async()
-     *
-     * @param callback Callback function to return received samples
-     * @param buf_num optional buffer count, buf_num * buf_len = overall buffer size
-     *		  set to 0 for default buffer count (15)
-     * @param buf_len optional buffer length, must be multiple of 512,
-     *		  should be a multiple of 16384 (URB size), set to 0
-     *		  for default buffer length (16 * 32 * 512)
-     */
-    readAsync(callback: (buf: string, len: number, ctx: void) => void, buf_num: number, buf_len: number): void;
 }
