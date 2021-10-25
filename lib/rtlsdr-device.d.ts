@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import ref from "ref-napi";
 import { DeviceUSBStrings } from "./rtlsdr-static";
 export interface XtalFreq {
@@ -191,7 +192,7 @@ export default class RTLSDRDevice {
      * Reset the device buffer
      */
     resetBuffer(): void;
-    readSync(len: number): any;
+    readSync(len: number): Buffer;
     /**
      * Read samples from the device asynchronously. This function will block until
      * it is being canceled using rtlsdr_cancel_async()

@@ -366,15 +366,14 @@ export default class RTLSDRDevice {
         if(result !== 0) throw new Error("Unknown Error [device.resetBuffer]");
     }
 
-    readSync(len:number) {
-        let buffer = Buffer.alloc(len);
+    readSync(len:number):Buffer {
+        let buffer = Buffer.alloc(len).fill(0);
         let n = ref.alloc(ref.types.int);
-        let ptr = ref.ref(buffer);
 
         // @ts-ignore
-        let result = librtlsdr.rtlsdr_read_sync(this.device, ptr, len, n);
+        let result = librtlsdr.rtlsdr_read_sync(this.device, buffer, len, n);
 
-        return ptr.deref();
+        return buffer;
     }
 
     /**
@@ -393,7 +392,6 @@ export default class RTLSDRDevice {
         // @ts-ignore
         librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {
             if(err) throw err;
-            console.log(value);
         });
     }
 }
