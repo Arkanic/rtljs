@@ -373,7 +373,7 @@ export default class RTLSDRDevice {
         // @ts-ignore
         let result = librtlsdr.rtlsdr_read_sync(this.device, buffer, len, n);
 
-        console.log(n);
+        console.log(n.deref());
 
         return buffer;
     }
