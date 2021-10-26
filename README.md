@@ -43,6 +43,8 @@ device.setCenterFreq(1090000000); // 1090MHz
 device.resetBuffer();
 let data = device.readSync(512);
 console.log(JSON.stringify(data));
+
+rtljs.close(device);
 ```
 
 ## API
