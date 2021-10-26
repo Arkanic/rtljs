@@ -1,6 +1,6 @@
-import {getDeviceCount, getDeviceName, getDeviceUSBStrings, getIndexBySerial, open, close} from "./rtlsdr-static";
+import {getDeviceCount, getDeviceName, getDeviceUSBStrings, getIndexBySerial, open, close, DeviceUSBStrings} from "./rtlsdr-static";
 import {rtlsdr_tunerEnum} from "./baremetal";
-import RTLSDRDevice from "./rtlsdr-device"
+import RTLSDRDevice, {XtalFreq} from "./rtlsdr-device"
 
 export {
     getDeviceCount,
@@ -10,5 +10,7 @@ export {
     open,
     close,
     rtlsdr_tunerEnum,
-    RTLSDRDevice
+    RTLSDRDevice,
+    DeviceUSBStrings,
+    XtalFreq
 };

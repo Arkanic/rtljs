@@ -5,6 +5,9 @@ import * as baremetal from "./baremetal";
 import {librtlsdr} from "./baremetal";
 import {DeviceUSBStrings, digestCharPtr} from "./rtlsdr-static";
 
+/**
+ * Contains rtl and tuner crystal oscillating frequency
+ */
 export interface XtalFreq {
     rtlFreq:number;
     tunerFreq:number;
@@ -12,6 +15,8 @@ export interface XtalFreq {
 
 /**
  * Opened RTLSDR device.
+ * 
+ * NOTE: Do not create an instance of this class directly (unless for some weird reason you want to provide a pure C dev* buffer)
  */
 export default class RTLSDRDevice {
     device:void;
