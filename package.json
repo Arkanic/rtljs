@@ -1,6 +1,6 @@
 {
   "name": "rtljs",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "node.js interface for librtl-sdr, using FFI-NAPI. Works with newer versions of node (like v16)",
   "main": "./lib/index.js",
   "module": "./lib/index.d.ts",
@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc -p tsconfig.json",
     "documentation": "typedoc src/index.ts",
-    "prepublish": "npm run tsc && npm run documentation"
+    "prepublishOnly": "npm run tsc && npm run documentation"
   },
   "repository": {
     "type": "git",
