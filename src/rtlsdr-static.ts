@@ -34,6 +34,9 @@ export function getDeviceName(index:number):string|null {
     return librtlsdr.rtlsdr_get_device_name(index);
 }
 
+/**
+ * Device USB Strings interface
+ */
 export interface DeviceUSBStrings {
     manufacturer:string|null;
     product:string|null;

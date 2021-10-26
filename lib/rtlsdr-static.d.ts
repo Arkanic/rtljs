@@ -16,6 +16,9 @@ export declare function getDeviceCount(): number;
  * @returns The name of the device. Max length 256 bytes. May be null.
  */
 export declare function getDeviceName(index: number): string | null;
+/**
+ * Device USB Strings interface
+ */
 export interface DeviceUSBStrings {
     manufacturer: string | null;
     product: string | null;

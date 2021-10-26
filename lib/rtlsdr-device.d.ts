@@ -5,6 +5,9 @@ export interface XtalFreq {
     rtlFreq: number;
     tunerFreq: number;
 }
+/**
+ * Opened RTLSDR device.
+ */
 export default class RTLSDRDevice {
     device: void;
     constructor(device: void);
