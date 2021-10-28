@@ -5,15 +5,34 @@ import { DeviceUSBStrings } from "./rtlsdr-static";
  * Contains rtl and tuner crystal oscillating frequency
  */
 export interface XtalFreq {
+    /**
+     * RTL crystal oscillating frequency
+     */
     rtlFreq: number;
+    /**
+     * Tuner crysta oscillating frequency
+     */
     tunerFreq: number;
 }
 /**
  * Opened RTLSDR device.
  *
  * NOTE: Do not create an instance of this class directly (unless for some weird reason you want to provide a pure C dev* buffer)
+ *
+ * @example
+ * ```js
+ * //Proper form
+ * let device = rtljs.open(index);
+ *
+ * //Improper form
+ * // C device Ptr (typed as void) from librtlsdr rtlsdr_open
+ * let device = new RTLSDRDevice(devPtr);
+ * ```
  */
 export default class RTLSDRDevice {
+    /**
+     * Raw C librtlsdr device (typed as void)
+     */
     device: void;
     constructor(device: void);
     /**
@@ -27,6 +46,14 @@ export default class RTLSDRDevice {
      *
      * @param rtlFreq Frequency value used to clock the RTL2832 in Hz
      * @param tunerFreq Frequency value used to clock the tuner IC in Hz
+     *
+     * @example
+     * ```js
+     * let xtal = device.getXtalFreq();
+     *
+     * // e.g.
+     * device.setXtalFreq(xtal.rtlFreq, xtal.tunerFreq);
+     * ```
      */
     setXtalFreq(rtlFreq: number, tunerFreq: number): void;
     /**
@@ -35,12 +62,26 @@ export default class RTLSDRDevice {
      * Usually both ICs use the same clock.
      *
      * @returns Frequency value used to clock the RTL2832 and IC, in Hz
+     *
+     * @example
+     * ```js
+     * let xtal = device.getXtalFreq();
+     *
+     * console.log(`${xtal.rtlFreq}, ${xtal.tunerFreq}`); // <RTL Freq in Hz>, <Tuner Freq in Hz>
+     * ```
      */
     getXtalFreq(): XtalFreq;
     /**
-     * Get USB device strings. Max size 256 bytes.
+     * Get USB device strings. Max size 256 bytes. Alike to `rtljs.getDeviceUSBStrings(index)`.
      *
      * @returns manufacturer, product, and serial strings. They may all be null.
+     *
+     * @example
+     * ```js
+     * let strings = device.getUSBStrings();
+     *
+     * console.log(`${strings.manufacturer}, ${strings.product}, ${strings.serial}`);
+     * ```
      */
     getUSBStrings(): DeviceUSBStrings;
     /**
@@ -63,24 +104,47 @@ export default class RTLSDRDevice {
      * Set tune frequency of the device
      *
      * @param freq Frequency to tune to in Hz
+     *
+     * @example
+     * ```js
+     * device.setCenterFreq(1090000000); // 1090MHz (1090*10^6Hz)
+     * ```
      */
     setCenterFreq(freq: number): void;
     /**
      * Get actual frequency the device is tuned to.
      *
      * @returns Frequency in Hz
+     *
+     * @example
+     * ```js
+     * let freq = device.getCenterFreq();
+     *
+     * console.log(freq); // 1090000000
+     * ```
      */
     getCenterFreq(): number;
     /**
      * Set the frequency correction value for the device.
      *
      * @param ppm Correction value in parts per million (ppm)
+     *
+     * @example
+     * ```js
+     * device.setFreqCorrection(1); // 1ppm correction
+     * ```
      */
     setFreqCorrection(ppm: number): void;
     /**
      * Get actual frequency correction value of the device.
      *
      * @returns Correction value in parts per million (ppm)
+     *
+     * @example
+     * ```js
+     * let ppm = device.getFreqCorrection();
+     * console.log(ppm); // 1
+     * ```
      */
     getFreqCorrection(): number;
     /**
