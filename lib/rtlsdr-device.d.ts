@@ -151,6 +151,13 @@ export default class RTLSDRDevice {
      * Get the tuner type.
      *
      * @returns RTLSDR_TUNER_UNKNOWN on error, tuner type otherwise
+     *
+     * @example
+     * ```js
+     * let type = device.getTunerType();
+     *
+     * console.log(type); // RTLSDR_TUNER_R820T
+     * ```
      */
     getTunerType(): string;
     /**
@@ -162,7 +169,7 @@ export default class RTLSDRDevice {
      * @param gains Array of gain values. In tenths of a dB, 115 means 11.5 dB.
      * @returns Number of available (returned) gain values otherwise
      */
-    getTunerGains(gains: ref.Pointer<number>): number;
+    getTunerGains(gains: Array<number>): number;
     /**
      * Set the gain for the device.
      * Manual gain mode must be enabled for this to work.
