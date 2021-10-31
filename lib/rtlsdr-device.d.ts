@@ -34,7 +34,9 @@ export default class RTLSDRDevice {
      * Raw C librtlsdr device (typed as void)
      */
     device: void;
+    open: boolean;
     constructor(device: void);
+    private checkOpen;
     /**
      * Set crystal oscillator frequencies used for the RTL2832 and the tuner IC.
      *

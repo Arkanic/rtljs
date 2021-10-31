@@ -39,9 +39,15 @@ export default class RTLSDRDevice {
      * Raw C librtlsdr device (typed as void)
      */
     device:void;
+    open:boolean;
 
     constructor(device:void) {
         this.device = device;
+        this.open = true;
+    }
+
+    private checkOpen() {
+        if(!this.open) throw new Error("Device is not open!");
     }
 
     /**
@@ -65,6 +71,7 @@ export default class RTLSDRDevice {
      * ```
      */
     setXtalFreq(rtlFreq:number, tunerFreq:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_xtal_freq(this.device, rtlFreq, tunerFreq);
         if(result !== 0) throw new Error("Unknown Error [device.setXtalFreq]");
@@ -85,6 +92,7 @@ export default class RTLSDRDevice {
      * ```
      */
     getXtalFreq():XtalFreq {
+        this.checkOpen();
         let rtlFreq = ref.alloc(baremetal.uint32Ptr);
         let tunerFreq = ref.alloc(baremetal.uint32Ptr);
 
@@ -111,6 +119,7 @@ export default class RTLSDRDevice {
      * ```
      */
     getUSBStrings():DeviceUSBStrings {
+        this.checkOpen();
         let manufacturer = Buffer.alloc(256).fill(0);
         let product = Buffer.alloc(256).fill(0);
         let serial = Buffer.alloc(256).fill(0);
@@ -134,6 +143,7 @@ export default class RTLSDRDevice {
      * @param len Length of the data
      */
     writeEEPROM(data:ref.Pointer<number>, offset:number, len:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_write_eeprom(this.device, data, offset, len);
         if(result === -1) throw new Error("Device handle is invalid");
@@ -150,6 +160,7 @@ export default class RTLSDRDevice {
      * 
      */
     readEEPROM(offset:number, len:number):number {
+        this.checkOpen();
         let data = ref.alloc(baremetal.uint8Ptr);
         
         // @ts-ignore
@@ -173,6 +184,7 @@ export default class RTLSDRDevice {
      * ```
      */
     setCenterFreq(freq:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_center_freq(this.device, freq);
         if(result < 0) throw new Error("Unknown Error [device.setCenterFreq]");
@@ -191,6 +203,7 @@ export default class RTLSDRDevice {
      * ```
      */
     getCenterFreq():number {
+        this.checkOpen();
         // @ts-ignore
         let freq = librtlsdr.rtlsdr_get_center_freq(this.device);
 
@@ -208,6 +221,7 @@ export default class RTLSDRDevice {
      * ```
      */
     setFreqCorrection(ppm:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_freq_correction(this.device, ppm);
         if(result < 0) throw new Error("Unknown Error [device.setFreqCorrection]");
@@ -225,6 +239,7 @@ export default class RTLSDRDevice {
      * ```
      */
     getFreqCorrection():number {
+        this.checkOpen();
         // @ts-ignore
         let ppm = librtlsdr.rtlsdr_get_freq_correction(this.device);
         return ppm;
@@ -243,6 +258,7 @@ export default class RTLSDRDevice {
      * ```
      */
     getTunerType():string {
+        this.checkOpen();
         // @ts-ignore
         let tunerVal = librtlsdr.rtlsdr_get_tuner_type(this.device);
 
@@ -259,6 +275,7 @@ export default class RTLSDRDevice {
      * @returns Number of available (returned) gain values otherwise
      */
     getTunerGains(gains:Array<number>|null):number {
+        this.checkOpen();
         let gBuf;
         if(gains) gBuf = Buffer.from(gains);
         else gBuf = ref.NULL;
@@ -282,6 +299,7 @@ export default class RTLSDRDevice {
      * @param gain Measured in tenths of a dB, 115 means 11.5 dB.
      */
     setTunerGain(gain:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_tuner_gain(this.device, gain);
         if(result < 0) throw new Error("Unknown Error [device.setTunerGain]");
@@ -293,6 +311,7 @@ export default class RTLSDRDevice {
      * @param bw Bandwidth in Hz. Zero means automatic BW selection.
      */
     setTunerBandwidth(bw:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_tuner_bandwidth(this.device, bw);
         if(result < 0) throw new Error("Unknown Error [device.setTunerBandwidth]");
@@ -304,6 +323,7 @@ export default class RTLSDRDevice {
      * @returns Gain in tenths of a dB, 115 means 11.5 dB.
      */
     getTunerGain():number {
+        this.checkOpen();
         // @ts-ignore
         let gain = librtlsdr.rtlsdr_get_tuner_gain(this.device);
         if(gain === 0) throw new Error("Unknown Error [device.getTunerGain]");
@@ -318,6 +338,7 @@ export default class RTLSDRDevice {
      * @param gain Measured in tenths of a dB, -30 means -3.0 dB.
      */
     setTunerIfGain(stage:number, gain:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_tuner_if_gain(this.device, stage, gain);
         if(result < 0) throw new Error("Unknown Error [device.setTunerIfGain]");
@@ -330,6 +351,7 @@ export default class RTLSDRDevice {
      * @param manual Gain mode, 1 means manual gain mode shall be enabled.
      */
     setTunerGainMode(manual:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_tuner_gain_mode(this.device, manual);
         if(result < 0) throw new Error("Unknown Error [device.setTunerGainMode]");
@@ -345,6 +367,7 @@ export default class RTLSDRDevice {
      * 		    sample loss is to be expected for rates > 2400000
      */
     setSampleRate(rate:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_sample_rate(this.device, rate);
         if(result !== 0) throw new Error("Unknown Error [device.setSampleRate]");
@@ -356,6 +379,7 @@ export default class RTLSDRDevice {
      * @returns Sample rate in Hz
      */
     getSampleRate():number {
+        this.checkOpen();
         // @ts-ignore
         let rate = librtlsdr.rtlsdr_get_sample_rate(this.device);
         if(rate === 0) throw new Error("Unknown Error [device.getSampleRate]");
@@ -370,6 +394,7 @@ export default class RTLSDRDevice {
      * @param on Test mode, 1 means enabled, 0 disabled
      */
     setTestmode(on:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_testmode(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setTestmode]");
@@ -381,6 +406,7 @@ export default class RTLSDRDevice {
      * @param on digital AGC mode, 1 means enabled, 0 disabled
      */
     setAGCMode(on:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_agc_mode(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setAGCMode]");
@@ -395,6 +421,7 @@ export default class RTLSDRDevice {
      * @param on 0 means disabled, 1 I-ADC input enabled, 2 Q-ADC input enabled
      */
     setDirectSampling(on:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_direct_sampling(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setDirectSampling]");
@@ -407,6 +434,7 @@ export default class RTLSDRDevice {
      *	    2 Q-ADC input enabled
      */
     getDirectSampling():number {
+        this.checkOpen();
         // @ts-ignore
         let ds = librtlsdr.rtlsdr_get_direct_sampling(this.device);
         if(ds === -1) throw new Error("Unknown Error [device.getDirectSampling]");
@@ -421,6 +449,7 @@ export default class RTLSDRDevice {
      * @param on 0 means disabled, 1 enabled
      */
     setOffsetTuning(on:number) {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_set_offset_tuning(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setOffsetTuning]");
@@ -432,6 +461,7 @@ export default class RTLSDRDevice {
      * @returns -1 on error, 0 means disabled, 1 enabled
      */
     getOffsetTuning():number {
+        this.checkOpen();
         // @ts-ignore
         let ot = librtlsdr.rtlsdr_get_offset_tuning(this.device);
         if(ot === 0) throw new Error("Unknown Error [device.getOffsetTuning]");
@@ -443,12 +473,14 @@ export default class RTLSDRDevice {
      * Reset the device buffer
      */
     resetBuffer() {
+        this.checkOpen();
         // @ts-ignore
         let result = librtlsdr.rtlsdr_reset_buffer(this.device);
         if(result !== 0) throw new Error("Unknown Error [device.resetBuffer]");
     }
 
     readSync(len:number):Buffer {
+        this.checkOpen();
         let buffer = Buffer.alloc(len).fill(0);
         let n = ref.alloc(ref.types.int);
 
@@ -470,6 +502,7 @@ export default class RTLSDRDevice {
      *		  for default buffer length (16 * 32 * 512)
      *
     readAsync(callback:(buf:string, len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
+        this.checkOpen();
         let rtlsdrCallback = ffi.Callback("void", ["char*", "uint32", "void"], callback);
         // @ts-ignore
         librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {

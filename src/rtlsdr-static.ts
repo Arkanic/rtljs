@@ -142,4 +142,6 @@ export function close(device:RTLSDRDevice) {
     // @ts-ignore
     let result = librtlsdr.rtlsdr_close(device.device);
     if(result !== 0) throw new Error("Unknown Error [close]");
+
+    device.open = false;
 }
