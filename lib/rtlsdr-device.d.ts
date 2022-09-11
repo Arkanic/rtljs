@@ -273,5 +273,11 @@ export default class RTLSDRDevice {
      * Reset the device buffer
      */
     resetBuffer(): void;
+    /**
+     * read signal data from the device
+     *
+     * @param len Amount of data to return
+     * @returns Buffer with signal data
+     */
     readSync(len: number): Buffer;
 }

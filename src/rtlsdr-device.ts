@@ -479,8 +479,15 @@ export default class RTLSDRDevice {
         if(result !== 0) throw new Error("Unknown Error [device.resetBuffer]");
     }
 
+    /**
+     * read signal data from the device
+     * 
+     * @param len Amount of data to return
+     * @returns Buffer with signal data
+     */
     readSync(len:number):Buffer {
         this.checkOpen();
+        this.resetBuffer();
         let buffer = Buffer.alloc(len).fill(0);
         let n = ref.alloc(ref.types.int);
 
