@@ -292,5 +292,9 @@ export default class RTLSDRDevice {
      *		  for default buffer length (16 * 32 * 512)
      *
     **/
-    readAsync(callback: (buf: string, len: number, ctx: void) => void, buf_num: number, buf_len: number): void;
+    readAsync(callback: (buf: number[], len: number, ctx: void) => void, buf_num: number, buf_len: number): void;
+    /**
+     * Cancels all pending async operations on the device.
+     */
+    cancelAsync(): void;
 }

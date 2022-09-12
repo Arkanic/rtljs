@@ -5,6 +5,9 @@ import * as baremetal from "./baremetal";
 import {librtlsdr} from "./baremetal";
 import {DeviceUSBStrings, digestCharPtr} from "./rtlsdr-static";
 
+const charPtr = ref.refType(ref.types.char);
+const voidPtr = ref.refType(ref.types.void);
+
 /**
  * Contains rtl and tuner crystal oscillating frequency
  */
@@ -509,19 +512,12 @@ export default class RTLSDRDevice {
      *		  for default buffer length (16 * 32 * 512)
      *
     **/
-    readAsync(callback:(buf:string, len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
+    readAsync(callback:(buf:number[], len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
         this.checkOpen();
-        let rtlsdrCallback = ffi.Callback("void", ["unsigned char*", "uint32", "void"], callback);
+        let rtlsdrCallback = ffi.Callback("void", [charPtr, "uint32", voidPtr], callback);
         // @ts-ignore
-<<<<<<< HEAD
         let result = librtlsdr.rtlsdr_read_async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len);
     }
-}
-=======
-        librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {
-            if(err) throw err;
-        });
-    }*/
 
     /**
      * Cancels all pending async operations on the device.
@@ -531,7 +527,5 @@ export default class RTLSDRDevice {
         
         // @ts-ignore
         let result = librtlsdr.rtlsdr_cancel_async(this.device);
-        if(result !== 0) throw new Error("Unknown Error [device.cancelAsync]")
     }
 }
->>>>>>> 5d94fba9b410ac3d7abb5cfd03250fa2cf5f8359
