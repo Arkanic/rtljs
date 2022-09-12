@@ -5,6 +5,9 @@ import * as baremetal from "./baremetal";
 import {librtlsdr} from "./baremetal";
 import {DeviceUSBStrings, digestCharPtr} from "./rtlsdr-static";
 
+const charPtr = ref.refType(ref.types.char);
+const voidPtr = ref.refType(ref.types.void);
+
 /**
  * Contains rtl and tuner crystal oscillating frequency
  */
@@ -496,24 +499,34 @@ export default class RTLSDRDevice {
 
         return buffer;
     }
-    /*
+
     /**
      * Read samples from the device asynchronously. This function will block until
-     * it is being canceled using rtlsdr_cancel_async()
+     * it is being canceled using cancelAsync()
      * 
-     * @param callback Callback function to return received samples
+     * @param callback Callback function to return received samples (buf:number[], len:number, ctx:void)
      * @param buf_num optional buffer count, buf_num * buf_len = overall buffer size
      *		  set to 0 for default buffer count (15)
      * @param buf_len optional buffer length, must be multiple of 512,
      *		  should be a multiple of 16384 (URB size), set to 0
      *		  for default buffer length (16 * 32 * 512)
      *
-    readAsync(callback:(buf:string, len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
+    **/
+    readAsync(callback:(buf:number[], len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
         this.checkOpen();
-        let rtlsdrCallback = ffi.Callback("void", ["char*", "uint32", "void"], callback);
+        let rtlsdrCallback = ffi.Callback("void", [charPtr, "uint32", voidPtr], callback);
         // @ts-ignore
-        librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {
-            if(err) throw err;
-        });
-    }*/
+        let result = librtlsdr.rtlsdr_read_async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len);
+    }
+
+    /**
+     * Cancels all pending async operations on the device.
+     */
+    cancelAsync():void {
+        this.checkOpen();
+        
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_cancel_async(this.device);
+	//if(result !== 0) console.error(`cancel async error ${typeof(result)} ${result}`);
+    }
 }
