@@ -1,3 +1,6 @@
+# 1.3.2
+Extra examples, some ease of use stuff
+
 # 1.3.1
 readAsync works, but cancelAsync does not
 

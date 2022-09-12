@@ -37,7 +37,7 @@ console.log(rtljs.getDeviceCount()); // 1
 console.log(rtljs.getDeviceName(0)); // Generic RTL R820T2
 
 let device = rtljs.open(0);
-device.setCenterFreq(1090000000); // 1090MHz
+device.setCenterFreq(1090 * rtljs.mhz); // 1090000000
 
 // raw IQ data
 device.resetBuffer(); // reset buffer to prevent communication data from appearing as radio data
@@ -49,6 +49,8 @@ rtljs.close(device);
 
 ## API
 TSDoc API available at [https://arkanic.github.io/rtljs/](https://arkanic.github.io/rtljs/)
+
+[Examples are available here](https://github.com/Arkanic/rtljs/tree/main/example)
 
 ## About
 Made by [Arkanic](https://github.com/Arkanic)
