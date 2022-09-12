@@ -511,8 +511,27 @@ export default class RTLSDRDevice {
     **/
     readAsync(callback:(buf:string, len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
         this.checkOpen();
-        let rtlsdrCallback = ffi.Callback("void", ["char*", "uint32", "void"], callback);
+        let rtlsdrCallback = ffi.Callback("void", ["unsigned char*", "uint32", "void"], callback);
         // @ts-ignore
+<<<<<<< HEAD
         let result = librtlsdr.rtlsdr_read_async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len);
     }
 }
+=======
+        librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {
+            if(err) throw err;
+        });
+    }*/
+
+    /**
+     * Cancels all pending async operations on the device.
+     */
+    cancelAsync():void {
+        this.checkOpen();
+        
+        // @ts-ignore
+        let result = librtlsdr.rtlsdr_cancel_async(this.device);
+        if(result !== 0) throw new Error("Unknown Error [device.cancelAsync]")
+    }
+}
+>>>>>>> 5d94fba9b410ac3d7abb5cfd03250fa2cf5f8359
