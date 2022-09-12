@@ -496,7 +496,7 @@ export default class RTLSDRDevice {
 
         return buffer;
     }
-    /*
+
     /**
      * Read samples from the device asynchronously. This function will block until
      * it is being canceled using rtlsdr_cancel_async()
@@ -508,12 +508,11 @@ export default class RTLSDRDevice {
      *		  should be a multiple of 16384 (URB size), set to 0
      *		  for default buffer length (16 * 32 * 512)
      *
+    **/
     readAsync(callback:(buf:string, len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
         this.checkOpen();
         let rtlsdrCallback = ffi.Callback("void", ["char*", "uint32", "void"], callback);
         // @ts-ignore
-        librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, value) => {
-            if(err) throw err;
-        });
-    }*/
+        let result = librtlsdr.rtlsdr_read_async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len);
+    }
 }
