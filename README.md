@@ -47,10 +47,24 @@ console.log(JSON.stringify(data)); // [128, 127, 128... etc
 rtljs.close(device);
 ```
 
+## Common Fixes
+### Nothing happening when i use readSync/Async, program just hangs
+remember to use device.resetBuffer() before using read commands
+### Can't access device
+you probably forgot to use close() in your code to end the device when the program ended. Reset your usb ports and this should now work fine.
+
 ## API
 TSDoc API available at [https://arkanic.github.io/rtljs/](https://arkanic.github.io/rtljs/)
 
 [Examples are available here](https://github.com/Arkanic/rtljs/tree/main/example)
+
+## Broken Stuff
+**Easy Fixes:**
+- There are no bias functions at the moment
+- ReadGains does not properly access c array, will either not work entirely or will only return the first item
+
+**??wtf??:**
+- cancelAsync refuses to work, likely some obscure multithreading error with ffi-napi (which happens to hate multithreading)
 
 ## About
 Made by [Arkanic](https://github.com/Arkanic)
