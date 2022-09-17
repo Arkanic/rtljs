@@ -1,3 +1,6 @@
+# 1.3.3
+Fixes to readAsync, cancelAsync should work now
+
 # 1.3.2
 Extra examples, some ease of use stuff
 

@@ -3,7 +3,7 @@ import ffi from "ffi-napi";
 
 import * as baremetal from "./baremetal";
 import {librtlsdr} from "./baremetal";
-import {DeviceUSBStrings, digestCharPtr} from "./rtlsdr-static";
+import {DeviceUSBStrings, digestCharPtr, close} from "./rtlsdr-static";
 
 const charPtr = ref.refType(ref.types.char);
 const voidPtr = ref.refType(ref.types.void);
@@ -17,7 +17,7 @@ export interface XtalFreq {
      */
     rtlFreq:number;
     /**
-     * Tuner crysta oscillating frequency
+     * Tuner crystal oscillating frequency
      */
     tunerFreq:number;
 }
@@ -516,7 +516,7 @@ export default class RTLSDRDevice {
         this.checkOpen();
         let rtlsdrCallback = ffi.Callback("void", [charPtr, "uint32", voidPtr], callback);
         // @ts-ignore
-        let result = librtlsdr.rtlsdr_read_async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len);
+        librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, res) => {});
     }
 
     /**
@@ -526,7 +526,11 @@ export default class RTLSDRDevice {
         this.checkOpen();
         
         // @ts-ignore
-        let result = librtlsdr.rtlsdr_cancel_async(this.device);
-	//if(result !== 0) console.error(`cancel async error ${typeof(result)} ${result}`);
+        librtlsdr.rtlsdr_cancel_async.async(this.device, (err, res) => {
+            if(res < 0) {
+                close(this);
+                console.error("Error trying to close device [device.cancelAsync]");
+            }
+        });
     }
 }

@@ -10,7 +10,7 @@ export interface XtalFreq {
      */
     rtlFreq: number;
     /**
-     * Tuner crysta oscillating frequency
+     * Tuner crystal oscillating frequency
      */
     tunerFreq: number;
 }
