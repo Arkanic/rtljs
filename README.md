@@ -11,8 +11,11 @@ This module requires [librtlsdr](https://github.com/steve-m/librtlsdr). This pac
 
 Librtlsdr is a package on most package repositories.
 
-Linux:
+#### Linux:
 ```sudo apt-get install librtlsdr-dev```
+
+#### Windows:
+you will need to install librtlsdr on your machine. [DLLs are availble on the librtlsdr wiki](https://osmocom.org/projects/rtl-sdr/wiki). These will need to be inserted into a system path folder so that ffi-napi can access them.
 
 ### Package
 ```npm i rtljs```
