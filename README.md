@@ -64,7 +64,6 @@ TSDoc API available at [https://arkanic.github.io/rtljs/](https://arkanic.github
 ## Broken Stuff
 **Easy Fixes:**
 - There are no bias functions at the moment
-- ReadGains does not properly access c array, will either not work entirely or will only return the first item
 
 **??wtf??:**
 - cancelAsync refuses to work, likely some obscure multithreading error with ffi-napi (which happens to hate multithreading)

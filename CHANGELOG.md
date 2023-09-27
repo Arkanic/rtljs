@@ -1,3 +1,8 @@
+# 2.0.0
+Finally fix tuner gains array issue - will now return a pure javascript array (not buffer)
+
+Bumping to new version because future updates will create breaking changes - switching from returning buffers to returning javascript arrays, both to ossify parsing (i.e. int is 4 buffer bytes long, whereas 1 long as an array which is preferred to prevent users from having to do more parsing)
+
 # 1.3.3
 Fixes to readAsync, cancelAsync should work now
 

@@ -15,8 +15,16 @@
 </a>
 <p>This module requires <a href="https://github.com/steve-m/librtlsdr">librtlsdr</a>. This package in turn requires <a href="https://libusb.info/">libusb</a>.</p>
 <p>Librtlsdr is a package on most package repositories.</p>
-<p>Linux:
-<code>sudo apt-get install librtlsdr-dev</code></p>
+
+<a href="#linux" id="linux" style="color: inherit; text-decoration: none;">
+  <h4>Linux:</h4>
+</a>
+<p><code>sudo apt-get install librtlsdr-dev</code></p>
+
+<a href="#windows" id="windows" style="color: inherit; text-decoration: none;">
+  <h4>Windows:</h4>
+</a>
+<p>you will need to install librtlsdr on your machine. <a href="https://osmocom.org/projects/rtl-sdr/wiki">DLLs are availble on the librtlsdr wiki</a>. These will need to be inserted into a system path folder so that ffi-napi can access them.</p>
 
 <a href="#package" id="package" style="color: inherit; text-decoration: none;">
   <h3>Package</h3>
@@ -63,7 +71,6 @@
 <p><strong>Easy Fixes:</strong></p>
 <ul>
 <li>There are no bias functions at the moment</li>
-<li>ReadGains does not properly access c array, will either not work entirely or will only return the first item</li>
 </ul>
 <p><strong>??wtf??:</strong></p>
 <ul>

@@ -171,7 +171,7 @@ export default class RTLSDRDevice {
      * @param gains Array of gain values. In tenths of a dB, 115 means 11.5 dB.
      * @returns Number of available (returned) gain values otherwise
      */
-    getTunerGains(gains: Array<number> | null): number;
+    getTunerGains(gains: Array<number> | null): Array<number>;
     /**
      * Set the gain for the device.
      * Manual gain mode must be enabled for this to work.
