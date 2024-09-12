@@ -1,6 +1,6 @@
 {
   "name": "rtljs",
-  "version": "1.3.3",
+  "version": "2.0.0",
   "description": "node.js interface for librtl-sdr, using FFI-NAPI. Works with newer versions of node (like v16)",
   "main": "./lib/index.js",
   "module": "./lib/index.d.ts",

@@ -277,16 +277,22 @@ export default class RTLSDRDevice {
      * @param gains Array of gain values. In tenths of a dB, 115 means 11.5 dB.
      * @returns Number of available (returned) gain values otherwise
      */
-    getTunerGains(gains:Array<number>|null):number {
+    getTunerGains(gains:Array<number>|null):Array<number> {
         this.checkOpen();
-        let gBuf;
-        if(gains) gBuf = Buffer.from(gains);
-        else gBuf = ref.NULL;
-        // @ts-ignore
-        let gain = librtlsdr.rtlsdr_get_tuner_gains(this.device, gBuf);
-        if(gain < 0) throw new Error("Unknown Error [device.getTunerGains]");
 
-        return gain;
+        // @ts-ignore
+        let gainCount = librtlsdr.rtlsdr_get_tuner_gains(this.device, ref.NULL);
+        let gainsArray = Buffer.alloc(gainCount * ref.types.int.size).fill(0);
+
+        // @ts-ignore
+        librtlsdr.rtlsdr_get_tuner_gains(this.device, gainsArray);
+
+        let arr = [];
+        for(let i = 0; i < gainCount; i++) {
+            arr.push(ref.types.int.get(gainsArray, ref.types.int.size * i));
+        }
+
+        return arr;
     }
 
     /**
