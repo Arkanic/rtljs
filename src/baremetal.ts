@@ -4,6 +4,7 @@ export const lib = koffi.load("librtlsdr.so.0");
 
 export const rtlsdr_dev_tPtr = koffi.inout(koffi.pointer(koffi.opaque("rtlsdr_dev_t")));
 export const rtlsdr_dev_tPtrPtr = koffi.inout(koffi.pointer(rtlsdr_dev_tPtr));
+
 export const rtlsdr_tunerEnum = [
     "RTLSDR_TUNER_UNKNOWN",
     "RTLSDR_TUNER_E4000",

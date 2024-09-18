@@ -1,7 +1,8 @@
-/// <reference types="node" />
-/// <reference types="ref-napi" />
-import RTLSDRDevice from "./rtlsdr-device";
-export declare function digestCharPtr(charPtr: Buffer): string | null;
+declare class RTLSDRDevice {
+    device: any;
+    open: boolean;
+    constructor(device: any);
+}
 /**
  * Get the number of available devices
  *
@@ -33,15 +34,15 @@ export interface DeviceUSBStrings {
     /**
      * Manufacturer of device, can be NULL
      */
-    manufacturer: string | null;
+    manufacturer: string;
     /**
      * Product name, can be NULL
      */
-    product: string | null;
+    product: string;
     /**
      * Serial No, can be NULL
      */
-    serial: string | null;
+    serial: string;
 }
 /**
  * Get USB device strings. Maximum length is 256 bytes.
@@ -89,3 +90,4 @@ export declare function open(index: number): RTLSDRDevice;
  * ```
  */
 export declare function close(device: RTLSDRDevice): void;
+export {};

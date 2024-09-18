@@ -1,18 +1,6 @@
-import ref from "ref-napi";
-
+import koffi from "koffi";
 import * as baremetal from "./baremetal";
-import {librtlsdr} from "./baremetal";
-import RTLSDRDevice from "./rtlsdr-device";
-
-export function digestCharPtr(charPtr:Buffer):string|null {
-    let terminatingNullPos = charPtr.indexOf("\u0000");
-    if(terminatingNullPos > 0) {
-        let rawString = charPtr.toString();
-        return rawString.substr(0, terminatingNullPos);
-    } else {
-        return null;
-    }
-}
+import {RTLSDRDevice} from "./rtlsdr-device";
 
 /**
  * Get the number of available devices
@@ -25,7 +13,7 @@ export function digestCharPtr(charPtr:Buffer):string|null {
  * ```
  */
 export function getDeviceCount():number {
-    return librtlsdr.rtlsdr_get_device_count();
+    return baremetal.rtlsdr_get_device_count();
 }
 
 /**
@@ -41,7 +29,7 @@ export function getDeviceCount():number {
  * ```
  */
 export function getDeviceName(index:number):string|null {
-    return librtlsdr.rtlsdr_get_device_name(index);
+    return baremetal.rtlsdr_get_device_name(index);
 }
 
 /**
@@ -51,15 +39,15 @@ export interface DeviceUSBStrings {
     /**
      * Manufacturer of device, can be NULL
      */
-    manufacturer:string|null;
+    manufacturer:string;
     /**
      * Product name, can be NULL
      */
-    product:string|null;
+    product:string;
     /**
      * Serial No, can be NULL
      */
-    serial:string|null;
+    serial:string;
 }
 
 /**
@@ -76,17 +64,16 @@ export interface DeviceUSBStrings {
  * ```
  */
 export function getDeviceUSBStrings(index:number):DeviceUSBStrings {
-    let manufacturer = Buffer.alloc(256).fill(0);
-    let product = Buffer.alloc(256).fill(0);
-    let serial = Buffer.alloc(256).fill(0);
+    let manufacturer = ["\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"];
+    let product = ["\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"];
+    let serial = ["\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"];
 
-    // @ts-ignore
-    let result = librtlsdr.rtlsdr_get_device_usb_strings(index, manufacturer, product, serial);
+    let result:number = baremetal.rtlsdr_get_device_usb_strings(index, manufacturer, product, serial);
     if(result !== 0) throw new Error(`Unknown Error [getDeviceUSBStrings(${index})]`);
     return {
-        manufacturer: digestCharPtr(manufacturer),
-        product: digestCharPtr(product),
-        serial: digestCharPtr(serial)
+        manufacturer: manufacturer[0],
+        product: product[0],
+        serial: serial[0]
     }
 }
 
@@ -98,7 +85,7 @@ export function getDeviceUSBStrings(index:number):DeviceUSBStrings {
  * @returns Device index of the first serial match
  */
 export function getIndexBySerial(serial:string):number {
-    let result = librtlsdr.rtlsdr_get_index_by_serial(serial);
+    let result:number = baremetal.rtlsdr_get_index_by_serial(serial);
     if(result === -1) throw new Error(`Name is NULL for serial ${serial}`);
     else if(result === -2) throw new Error(`No devices were found at all for serial ${serial}`);
     else if(result === -3) throw new Error(`Devices were found, but none with matching name for serial ${serial}`);
@@ -121,11 +108,12 @@ export function getIndexBySerial(serial:string):number {
  * ```
  */
 export function open(index:number):RTLSDRDevice {
-    let devicePtr = ref.alloc(baremetal.rtlsdr_devPtr);
-    let result = librtlsdr.rtlsdr_open(devicePtr, index);
+    let devicePtr = [0];
+    let result:number = baremetal.rtlsdr_open(devicePtr, index);
     if(result !== 0) throw new Error(`Unknown Error [open(${index})]`);
-
-    return new RTLSDRDevice(devicePtr.deref());
+    
+    let device = koffi.address(devicePtr[0]);
+    return new RTLSDRDevice(device);
 }
 
 /**
@@ -139,8 +127,7 @@ export function open(index:number):RTLSDRDevice {
  * ```
  */
 export function close(device:RTLSDRDevice) {
-    // @ts-ignore
-    let result = librtlsdr.rtlsdr_close(device.device);
+    let result:number = baremetal.rtlsdr_close(device.device);
     if(result !== 0) throw new Error("Unknown Error [close]");
 
     device.open = false;
