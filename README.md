@@ -1,9 +1,9 @@
 # RTLjs
 Node.js interface for librtlsdr, using FFI-NAPI
 
-Works with modern versions of node (v14-16 etc.), unlike alternate packages on NPM
+Works with modern versions of node, unlike alternate packages on NPM
 
-Only tested on Linux, but if you ask me, I can very easily add windows/macos support.
+Only tested on Linux, but if you ask me, I (think I) can very easily add windows/macos support.
 
 ## Installation
 ### Prerequisites
@@ -62,11 +62,7 @@ TSDoc API available at [https://arkanic.github.io/rtljs/](https://arkanic.github
 [Examples are available here](https://github.com/Arkanic/rtljs/tree/main/example)
 
 ## Broken Stuff
-**Easy Fixes:**
-- There are no bias functions at the moment
-
-**??wtf??:**
-- cancelAsync refuses to work, likely some obscure multithreading error with ffi-napi (which happens to hate multithreading)
+`readAsync` is not currently implemented with the FFI library change, this is in progress.
 
 ## About
 Made by [Arkanic](https://github.com/Arkanic)
