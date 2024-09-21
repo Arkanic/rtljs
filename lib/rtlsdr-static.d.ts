@@ -1,8 +1,4 @@
-declare class RTLSDRDevice {
-    device: any;
-    open: boolean;
-    constructor(device: any);
-}
+import RTLSDRDevice from "./rtlsdr-device";
 /**
  * Get the number of available devices
  *
@@ -90,4 +86,3 @@ export declare function open(index: number): RTLSDRDevice;
  * ```
  */
 export declare function close(device: RTLSDRDevice): void;
-export {};

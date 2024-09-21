@@ -1,6 +1,7 @@
 import koffi from "koffi";
 import * as baremetal from "./baremetal";
-import {RTLSDRDevice} from "./rtlsdr-device";
+import RTLSDRDevice from "./rtlsdr-device";
+import {charArrayAlloc} from "./util";
 
 /**
  * Get the number of available devices
@@ -64,9 +65,9 @@ export interface DeviceUSBStrings {
  * ```
  */
 export function getDeviceUSBStrings(index:number):DeviceUSBStrings {
-    let manufacturer = ["\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"];
-    let product = ["\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"];
-    let serial = ["\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"];
+    let manufacturer = charArrayAlloc(64);
+    let product = charArrayAlloc(64);
+    let serial = charArrayAlloc(64);
 
     let result:number = baremetal.rtlsdr_get_device_usb_strings(index, manufacturer, product, serial);
     if(result !== 0) throw new Error(`Unknown Error [getDeviceUSBStrings(${index})]`);

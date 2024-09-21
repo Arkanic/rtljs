@@ -1,5 +1,3 @@
-/// <reference types="node" />
-import ref from "ref-napi";
 import { DeviceUSBStrings } from "./rtlsdr-static";
 /**
  * Contains rtl and tuner crystal oscillating frequency
@@ -33,9 +31,10 @@ export default class RTLSDRDevice {
     /**
      * Raw C librtlsdr device (typed as void)
      */
-    device: void;
+    device: bigint;
     open: boolean;
-    constructor(device: void);
+    supportedGains: Array<number>;
+    constructor(device: bigint);
     private checkOpen;
     /**
      * Set crystal oscillator frequencies used for the RTL2832 and the tuner IC.
@@ -93,7 +92,7 @@ export default class RTLSDRDevice {
      * @param offset Address where the data should be written
      * @param len Length of the data
      */
-    writeEEPROM(data: ref.Pointer<number>, offset: number, len: number): void;
+    writeEEPROM(data: Array<number>, offset: number, len: number): void;
     /**
      * Read the device EEPROM
      *
@@ -101,7 +100,7 @@ export default class RTLSDRDevice {
      * @param len Length of the data
      *
      */
-    readEEPROM(offset: number, len: number): number;
+    readEEPROM(offset: number, len: number): Array<number>;
     /**
      * Set tune frequency of the device
      *
@@ -168,19 +167,14 @@ export default class RTLSDRDevice {
      * NOTE: The gains argument must be preallocated by the caller. If NULL is
      * being given instead, the number of available gain values will be returned.
      *
-     * @param gains Array of gain values. In tenths of a dB, 115 means 11.5 dB.
      * @returns Number of available (returned) gain values otherwise
      */
-    getTunerGains(gains: Array<number> | null): Array<number>;
+    getTunerGains(): Array<number>;
     /**
      * Set the gain for the device.
      * Manual gain mode must be enabled for this to work.
      *
-     * Valid gain values (in tenths of a dB) for the E4000 tuner:
-     * -10, 15, 40, 65, 90, 115, 140, 165, 190,
-     * 215, 240, 290, 340, 420, 430, 450, 470, 490
-     *
-     * Valid gain values may be queried with rtlsdr_get_tuner_gains function.
+     * Each device has a specific set of gains it supports. Gains are checked against pre-aquired array of gains by rtljs for validity.
      *
      * @param gain Measured in tenths of a dB, 115 means 11.5 dB.
      */
@@ -275,11 +269,12 @@ export default class RTLSDRDevice {
     resetBuffer(): void;
     /**
      * read signal data from the device
+     * array returned may be smaller than what was requested
      *
      * @param len Amount of data to return
      * @returns Buffer with signal data
      */
-    readSync(len: number): Buffer;
+    readSync(len: number): Array<number>;
     /**
      * Read samples from the device asynchronously. This function will block until
      * it is being canceled using cancelAsync()

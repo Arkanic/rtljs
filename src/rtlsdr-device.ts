@@ -1,12 +1,47 @@
-import ref from "ref-napi";
-import ffi from "ffi-napi";
+/*device
+console.log("Devices: ", baremetal.rtlsdr_get_device_count());
 
+let devicePtr = [0];
+baremetal.rtlsdr_open(devicePtr, 0);
+console.log(devicePtr);
+let device = koffi.address(devicePtr[0]);
+baremetal.rtlsdr_set_center_freq(device, 1090000000)
+console.log(baremetal.rtlsdr_get_center_freq(device));
+baremetal.rtlsdr_close(device);
+
+xtal
+let rtl_freq = [0];
+let tuner_freq = [0];
+baremetal.rtlsdr_get_xtal_freq(device, rtl_freq, tuner_freq);
+
+//let rtl_freq_r = koffi.address(rtl_freq[0]);
+//let tuner_freq_r = koffi.address(tuner_freq[0]);
+
+console.log(rtl_freq, tuner_freq);
+
+gains
+let tunerType = baremetal.rtlsdr_tunerEnum[baremetal.rtlsdr_get_tuner_type(device)];
+console.log(tunerType);
+
+let tunerGains = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+let len = baremetal.rtlsdr_get_tuner_gains(device, tunerGains);
+console.log("size: " + len);
+for(let i = 0; i < len; i++) {
+    console.log(tunerGains[i]);
+}
+
+readSync
+
+baremetal.rtlsdr_reset_buffer(device);
+
+
+*/
+
+import koffi from "koffi";
 import * as baremetal from "./baremetal";
-import {librtlsdr} from "./baremetal";
-import {DeviceUSBStrings, digestCharPtr, close} from "./rtlsdr-static";
+import {DeviceUSBStrings, close} from "./rtlsdr-static";
+import {charArrayAlloc, numberArrayAlloc} from "./util";
 
-const charPtr = ref.refType(ref.types.char);
-const voidPtr = ref.refType(ref.types.void);
 
 /**
  * Contains rtl and tuner crystal oscillating frequency
@@ -41,12 +76,15 @@ export default class RTLSDRDevice {
     /**
      * Raw C librtlsdr device (typed as void)
      */
-    device:void;
+    device:bigint;
     open:boolean;
+    supportedGains:Array<number>;
 
-    constructor(device:void) {
+    constructor(device:bigint) {
         this.device = device;
         this.open = true;
+
+        this.supportedGains = this.getTunerGains();
     }
 
     private checkOpen() {
@@ -75,8 +113,7 @@ export default class RTLSDRDevice {
      */
     setXtalFreq(rtlFreq:number, tunerFreq:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_xtal_freq(this.device, rtlFreq, tunerFreq);
+        let result = baremetal.rtlsdr_set_xtal_freq(this.device, rtlFreq, tunerFreq);
         if(result !== 0) throw new Error("Unknown Error [device.setXtalFreq]");
     }
 
@@ -96,16 +133,15 @@ export default class RTLSDRDevice {
      */
     getXtalFreq():XtalFreq {
         this.checkOpen();
-        let rtlFreq = ref.alloc(baremetal.uint32Ptr);
-        let tunerFreq = ref.alloc(baremetal.uint32Ptr);
-
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_get_xtal_freq(this.device, rtlFreq, tunerFreq);
+        let rtlFreqPtr = [0];
+        let tunerFreqPtr = [0];
+        
+        let result = baremetal.rtlsdr_get_xtal_freq(this.device, rtlFreqPtr, tunerFreqPtr);
         if(result !== 0) throw new Error("Unknown Error [getXtalFreq]");
 
         return {
-            rtlFreq: rtlFreq.deref(),
-            tunerFreq: rtlFreq.deref()
+            rtlFreq: rtlFreqPtr[0],
+            tunerFreq: rtlFreqPtr[0]
         }
     }
 
@@ -123,18 +159,18 @@ export default class RTLSDRDevice {
      */
     getUSBStrings():DeviceUSBStrings {
         this.checkOpen();
-        let manufacturer = Buffer.alloc(256).fill(0);
-        let product = Buffer.alloc(256).fill(0);
-        let serial = Buffer.alloc(256).fill(0);
 
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_get_usb_strings(this.device, manufacturer, product, serial);
+        let manufacturer = charArrayAlloc(64);
+        let product = charArrayAlloc(64);
+        let serial = charArrayAlloc(64);
+
+        let result = baremetal.rtlsdr_get_usb_strings(this.device, manufacturer, product, serial);
         if(result !== 0) throw new Error("Unknown Error [device.getUSBStrings]");
 
         return {
-            manufacturer: digestCharPtr(manufacturer),
-            product: digestCharPtr(product),
-            serial: digestCharPtr(serial)
+            manufacturer: manufacturer[0],
+            product: product[0],
+            serial: serial[0]
         }
     }
 
@@ -145,10 +181,10 @@ export default class RTLSDRDevice {
      * @param offset Address where the data should be written
      * @param len Length of the data
      */
-    writeEEPROM(data:ref.Pointer<number>, offset:number, len:number) {
+    writeEEPROM(data:Array<number>, offset:number, len:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_write_eeprom(this.device, data, offset, len);
+
+        let result = baremetal.rtlsdr_write_eeprom(this.device, data, offset, len);
         if(result === -1) throw new Error("Device handle is invalid");
         else if(result === -2) throw new Error("EEPROM size is exceeded");
         else if(result === -3) throw new Error("No EEPROM was found");
@@ -162,18 +198,17 @@ export default class RTLSDRDevice {
      * @param len Length of the data
      * 
      */
-    readEEPROM(offset:number, len:number):number {
+    readEEPROM(offset:number, len:number):Array<number> {
         this.checkOpen();
-        let data = ref.alloc(baremetal.uint8Ptr);
-        
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_read_eeprom(this.device, data, offset, len);
+
+        let buffer = numberArrayAlloc(len);
+        let result = baremetal.rtlsdr_read_eeprom(this.device, buffer, offset, len);
         if(result === -1) throw new Error("Device handle is invalid");
         else if(result === -2) throw new Error("EEPROM size is exceeded");
         else if(result === -3) throw new Error("No EEPROM was found");
         else if(result < 0) throw new Error("Unknown Error [device.readEEPROM]");
 
-        return data.deref();
+        return buffer;
     }
 
     /**
@@ -188,8 +223,8 @@ export default class RTLSDRDevice {
      */
     setCenterFreq(freq:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_center_freq(this.device, freq);
+
+        let result = baremetal.rtlsdr_set_center_freq(this.device, freq);
         if(result < 0) throw new Error("Unknown Error [device.setCenterFreq]");
     }
 
@@ -207,8 +242,8 @@ export default class RTLSDRDevice {
      */
     getCenterFreq():number {
         this.checkOpen();
-        // @ts-ignore
-        let freq = librtlsdr.rtlsdr_get_center_freq(this.device);
+
+        let freq = baremetal.rtlsdr_get_center_freq(this.device);
 
         return freq;
     }
@@ -225,8 +260,8 @@ export default class RTLSDRDevice {
      */
     setFreqCorrection(ppm:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_freq_correction(this.device, ppm);
+
+        let result = baremetal.rtlsdr_set_freq_correction(this.device, ppm);
         if(result < 0) throw new Error("Unknown Error [device.setFreqCorrection]");
     }
 
@@ -243,8 +278,8 @@ export default class RTLSDRDevice {
      */
     getFreqCorrection():number {
         this.checkOpen();
-        // @ts-ignore
-        let ppm = librtlsdr.rtlsdr_get_freq_correction(this.device);
+
+        let ppm = baremetal.rtlsdr_get_freq_correction(this.device);
         return ppm;
     }
 
@@ -262,8 +297,8 @@ export default class RTLSDRDevice {
      */
     getTunerType():string {
         this.checkOpen();
-        // @ts-ignore
-        let tunerVal = librtlsdr.rtlsdr_get_tuner_type(this.device);
+
+        let tunerVal = baremetal.rtlsdr_get_tuner_type(this.device);
 
         return baremetal.rtlsdr_tunerEnum[tunerVal];
     }
@@ -274,43 +309,34 @@ export default class RTLSDRDevice {
      * NOTE: The gains argument must be preallocated by the caller. If NULL is
      * being given instead, the number of available gain values will be returned.
      * 
-     * @param gains Array of gain values. In tenths of a dB, 115 means 11.5 dB.
      * @returns Number of available (returned) gain values otherwise
      */
-    getTunerGains(gains:Array<number>|null):Array<number> {
+    getTunerGains():Array<number> {
         this.checkOpen();
 
-        // @ts-ignore
-        let gainCount = librtlsdr.rtlsdr_get_tuner_gains(this.device, ref.NULL);
-        let gainsArray = Buffer.alloc(gainCount * ref.types.int.size).fill(0);
+        let gainCount = baremetal.rtlsdr_get_tuner_gains(this.device, null);
+        let gains = numberArrayAlloc(gainCount);
+        
+        let result = baremetal.rtlsdr_get_tuner_gains(this.device, gains);
+        if(result < 0) throw new Error("Unknown Error [device.getTunerGains]");
 
-        // @ts-ignore
-        librtlsdr.rtlsdr_get_tuner_gains(this.device, gainsArray);
-
-        let arr = [];
-        for(let i = 0; i < gainCount; i++) {
-            arr.push(ref.types.int.get(gainsArray, ref.types.int.size * i));
-        }
-
-        return arr;
+        return gains;
     }
 
     /**
      * Set the gain for the device.
      * Manual gain mode must be enabled for this to work.
      *
-     * Valid gain values (in tenths of a dB) for the E4000 tuner:
-     * -10, 15, 40, 65, 90, 115, 140, 165, 190,
-     * 215, 240, 290, 340, 420, 430, 450, 470, 490
-     *
-     * Valid gain values may be queried with rtlsdr_get_tuner_gains function.
+     * Each device has a specific set of gains it supports. Gains are checked against pre-aquired array of gains by rtljs for validity.
      * 
      * @param gain Measured in tenths of a dB, 115 means 11.5 dB.
      */
     setTunerGain(gain:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_tuner_gain(this.device, gain);
+
+        if(this.supportedGains.indexOf(gain) === -1) throw new Error(`RTLJS: Gain ${gain} not supported by device [device.setTunerGain]`);
+
+        let result = baremetal.rtlsdr_set_tuner_gain(this.device, gain);
         if(result < 0) throw new Error("Unknown Error [device.setTunerGain]");
     }
 
@@ -321,8 +347,8 @@ export default class RTLSDRDevice {
      */
     setTunerBandwidth(bw:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_tuner_bandwidth(this.device, bw);
+
+        let result = baremetal.rtlsdr_set_tuner_bandwidth(this.device, bw);
         if(result < 0) throw new Error("Unknown Error [device.setTunerBandwidth]");
     }
 
@@ -333,9 +359,8 @@ export default class RTLSDRDevice {
      */
     getTunerGain():number {
         this.checkOpen();
-        // @ts-ignore
-        let gain = librtlsdr.rtlsdr_get_tuner_gain(this.device);
-        if(gain === 0) throw new Error("Unknown Error [device.getTunerGain]");
+
+        let gain = baremetal.rtlsdr_get_tuner_gain(this.device);
 
         return gain;
     }
@@ -348,8 +373,8 @@ export default class RTLSDRDevice {
      */
     setTunerIfGain(stage:number, gain:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_tuner_if_gain(this.device, stage, gain);
+
+        let result = baremetal.rtlsdr_set_tuner_if_gain(this.device, stage, gain);
         if(result < 0) throw new Error("Unknown Error [device.setTunerIfGain]");
     }
 
@@ -361,8 +386,8 @@ export default class RTLSDRDevice {
      */
     setTunerGainMode(manual:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_tuner_gain_mode(this.device, manual);
+
+        let result = baremetal.rtlsdr_set_tuner_gain_mode(this.device, manual);
         if(result < 0) throw new Error("Unknown Error [device.setTunerGainMode]");
     }
 
@@ -377,8 +402,8 @@ export default class RTLSDRDevice {
      */
     setSampleRate(rate:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_sample_rate(this.device, rate);
+
+        let result = baremetal.rtlsdr_set_sample_rate(this.device, rate);
         if(result !== 0) throw new Error("Unknown Error [device.setSampleRate]");
     }
 
@@ -389,8 +414,8 @@ export default class RTLSDRDevice {
      */
     getSampleRate():number {
         this.checkOpen();
-        // @ts-ignore
-        let rate = librtlsdr.rtlsdr_get_sample_rate(this.device);
+
+        let rate = baremetal.rtlsdr_get_sample_rate(this.device);
         if(rate === 0) throw new Error("Unknown Error [device.getSampleRate]");
 
         return rate;
@@ -404,8 +429,8 @@ export default class RTLSDRDevice {
      */
     setTestmode(on:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_testmode(this.device, on);
+
+        let result = baremetal.rtlsdr_set_testmode(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setTestmode]");
     }
 
@@ -415,9 +440,8 @@ export default class RTLSDRDevice {
      * @param on digital AGC mode, 1 means enabled, 0 disabled
      */
     setAGCMode(on:number) {
-        this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_agc_mode(this.device, on);
+
+        let result = baremetal.rtlsdr_set_agc_mode(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setAGCMode]");
     }
 
@@ -431,8 +455,8 @@ export default class RTLSDRDevice {
      */
     setDirectSampling(on:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_direct_sampling(this.device, on);
+
+        let result = baremetal.rtlsdr_set_direct_sampling(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setDirectSampling]");
     }
 
@@ -444,8 +468,8 @@ export default class RTLSDRDevice {
      */
     getDirectSampling():number {
         this.checkOpen();
-        // @ts-ignore
-        let ds = librtlsdr.rtlsdr_get_direct_sampling(this.device);
+
+        let ds = baremetal.rtlsdr_get_direct_sampling(this.device);
         if(ds === -1) throw new Error("Unknown Error [device.getDirectSampling]");
 
         return ds;
@@ -459,8 +483,8 @@ export default class RTLSDRDevice {
      */
     setOffsetTuning(on:number) {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_set_offset_tuning(this.device, on);
+
+        let result = baremetal.rtlsdr_set_offset_tuning(this.device, on);
         if(result !== 0) throw new Error("Unknown Error [device.setOffsetTuning]");
     }
 
@@ -471,9 +495,9 @@ export default class RTLSDRDevice {
      */
     getOffsetTuning():number {
         this.checkOpen();
-        // @ts-ignore
-        let ot = librtlsdr.rtlsdr_get_offset_tuning(this.device);
-        if(ot === 0) throw new Error("Unknown Error [device.getOffsetTuning]");
+
+        let ot = baremetal.rtlsdr_get_offset_tuning(this.device);
+        if(ot === -1) throw new Error("Unknown Error [device.getOffsetTuning]");
 
         return ot;
     }
@@ -483,26 +507,27 @@ export default class RTLSDRDevice {
      */
     resetBuffer() {
         this.checkOpen();
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_reset_buffer(this.device);
+
+        let result = baremetal.rtlsdr_reset_buffer(this.device);
         if(result !== 0) throw new Error("Unknown Error [device.resetBuffer]");
     }
 
     /**
      * read signal data from the device
+     * array returned may be smaller than what was requested
      * 
      * @param len Amount of data to return
      * @returns Buffer with signal data
      */
-    readSync(len:number):Buffer {
+    readSync(len:number):Array<number> {
         this.checkOpen();
         this.resetBuffer();
-        let buffer = Buffer.alloc(len).fill(0);
-        let n = ref.alloc(ref.types.int);
 
-        // @ts-ignore
-        let result = librtlsdr.rtlsdr_read_sync(this.device, buffer, len, n);
+        let buffer = numberArrayAlloc(len);
+        let n_read = [0];
+        baremetal.rtlsdr_read_sync(this.device, buffer, 2048, n_read);
 
+        buffer.length = n_read[0];
         return buffer;
     }
 
@@ -520,9 +545,6 @@ export default class RTLSDRDevice {
     **/
     readAsync(callback:(buf:number[], len:number, ctx:void)=>void, buf_num:number, buf_len:number) {
         this.checkOpen();
-        let rtlsdrCallback = ffi.Callback("void", [charPtr, "uint32", voidPtr], callback);
-        // @ts-ignore
-        librtlsdr.rtlsdr_read_async.async(this.device, rtlsdrCallback, ref.NULL, buf_num, buf_len, (err, res) => {});
     }
 
     /**
@@ -530,13 +552,5 @@ export default class RTLSDRDevice {
      */
     cancelAsync():void {
         this.checkOpen();
-        
-        // @ts-ignore
-        librtlsdr.rtlsdr_cancel_async.async(this.device, (err, res) => {
-            if(res < 0) {
-                close(this);
-                console.error("Error trying to close device [device.cancelAsync]");
-            }
-        });
     }
 }
